@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Semester Marks Comparison</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .chart-container {
+            display: flex;
+            justify-content: space-between;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Semester Marks Comparison</h1>
+        <form id="scoresForm">
+            <h2>Enter scores for Person 2:</h2>
+            <div>
+                <label for="sem1">Semester 1:</label>
+                <input type="number" id="sem1" required>
+            </div>
+            <div>
+                <label for="sem2">Semester 2:</label>
+                <input type="number" id="sem2" required>
+            </div>
+            <div>
+                <label for="sem3">Semester 3:</label>
+                <input type="number" id="sem3" required>
+            </div>
+            <div>
+                <label for="sem4">Semester 4:</label>
+                <input type="number" id="sem4" required>
+            </div>
+            <div>
+                <label for="sem5">Semester 5:</label>
+                <input type="number" id="sem5" required>
+            </div>
+            <button type="button" onclick="compareScores()">Compare Scores</button>
+        </form>
+        
+        <div id="results">
+            <h2>Results:</h2>
+            <table id="comparisonTable">
+                <thead>
+                    <tr>
+                        <th>Semester</th>
+                        <th>Fixed Person 1</th>
+                        <th>Person 2</th>
+                        <th>Difference</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            <div class="chart-container">
+                <canvas id="scoresChart" width="400" height="300"></canvas>
+                <canvas id="differencesChart" width="400" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const fixedScoresPerson1 = [569, 567, 585, 731, 622];
+
+        function compareScores() {
+            const scoresPerson2 = [
+                parseFloat(document.getElementById('sem1').value),
+                parseFloat(document.getElementById('sem2').value),
+                parseFloat(document.getElementById('sem3').value),
+                parseFloat(document.getElementById('sem4').value),
+                parseFloat(document.getElementById('sem5').value)
+            ];
+
+            const differences = fixedScoresPerson1.map((score, index) => score - scoresPerson2[index]);
+            const totalDifference = differences.reduce((acc, diff) => acc + diff, 0);
+
+            // Update results table
+            const tableBody = document.querySelector('#comparisonTable tbody');
+            tableBody.innerHTML = '';
+            fixedScoresPerson1.forEach((score, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>Semester ${index + 1}</td>
+                    <td>${score}</td>
+                    <td>${scoresPerson2[index]}</td>
+                    <td>${differences[index]}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+            tableBody.innerHTML += `
+                <tr>
+                    <td colspan="3">Total Difference</td>
+                    <td>${totalDifference.toFixed(2)}</td>
+                </tr>
+            `;
+
+            // Plotting the scores and differences using Chart.js
+            const ctxScores = document.getElementById('scoresChart').getContext('2d');
+            const ctxDifferences = document.getElementById('differencesChart').getContext('2d');
+
+            new Chart(ctxScores, {
+                type: 'line',
+                data: {
+                    labels: ['Semester 1', 'Semester 2', 'Semester 3', 'Semester 4', 'Semester 5'],
+                    datasets: [
+                        {
+                            label: 'Fixed Person 1',
+                            data: fixedScoresPerson1,
+                            borderColor: 'blue',
+                            fill: false
+                        },
+                        {
+                            label: 'Person 2',
+                            data: scoresPerson2,
+                            borderColor: 'red',
+                            fill: false
+                        }
+                    ]
+                }
+            });
+
+            new Chart(ctxDifferences, {
+                type: 'bar',
+                data: {
+                    labels: ['Semester 1', 'Semester 2', 'Semester 3', 'Semester 4', 'Semester 5'],
+                    datasets: [{
+                        label: 'Difference',
+                        data: differences,
+                        backgroundColor: 'green'
+                    }]
+                }
+            });
+        }
+    </script>
+</body>
+</html>
